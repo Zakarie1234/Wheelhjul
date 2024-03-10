@@ -1,0 +1,18 @@
+/* styles.css */
+body {
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    text-align: center;
+}
+
+#connectedUsers {
+    margin-top: 20px;
+    padding: 0;
+    list-style-type: none;
+}
+
+#connectedUsers li {
+    margin-bottom: 5px;
+}

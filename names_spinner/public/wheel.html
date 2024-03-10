@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='chrome=1'>
+    <title>Wheel by inlinestyle</title>
+    <link rel='stylesheet' href='wheel.css'>
+    <meta name='viewport' content='width=device-width'>
+  </head>
+  <body>
+    <div class='wrapper'>
+      <header>
+        <h1>Welcome to the Wheel of Names</h1>
+        <p>List of connected users</p>
+		<div id='students'>
+          <ul/>
+        </div>
+        
+
+		<!-- <h2>Connected Users:</h2>
+	    <ul id="userList"></ul> -->
+	    <button id="spinButton">Spin Wheel</button>
+      </header>
+      	
+
+      <section>
+        <div id='wheel' >
+          <canvas id='canvas' width='1000' height='600'></canvas>
+        </div>
+      </section>
+
+
+    </div>
+    <script
+      src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'
+      crossorigin='anonymous'></script>
+    <script
+      src='https://cdnjs.cloudflare.com/ajax/libs/tinysort/2.3.6/tinysort.min.js'
+      crossorigin='anonymous'></script>
+    <script
+      src='https://cdnjs.cloudflare.com/ajax/libs/tinysort/2.3.6/jquery.tinysort.min.js'
+      crossorigin='anonymous'></script>
+    <script src='wheel.js'></script>    
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script src="socket.js"></script>
+    <script>
+
+        function updateUserList(users, randomNumber) {
+            // const userList = document.getElementById('userList');
+            // userList.innerHTML = ''; // Clear previous list
+
+            // users.forEach(user => {
+            //     console.log(user)
+            //     const listItem = document.createElement('li');
+            //     listItem.textContent = user.name.username;
+            //     userList.appendChild(listItem);
+            // });
+
+
+            $(function () {
+			  var studentContainer = $('#students ul');
+			  studentContainer.empty();
+
+			  users.forEach(function (student) {
+			    var name = student.name.username;
+			    studentContainer.append(
+			      $(document.createElement('li')).append(
+			        $(document.createElement('input')).attr({
+			          id: 'student-' + name,
+			          name: name,
+			          value: name,
+			          type: 'checkbox',
+			          checked: true
+			        }).change(function () {
+			          var cbox = $(this)[0];
+			          var segments = wheel.segments;
+			          var i = segments.indexOf(cbox.value);
+
+			          if (cbox.checked && i == -1) {
+			            segments.push(cbox.value);
+
+			          } else if (!cbox.checked && i != -1) {
+			            segments.splice(i, 1);
+			          }
+
+			          segments.sort();
+			          wheel.update(randomNumber);
+			        })
+			      ).append(
+			        $(document.createElement('label')).attr({
+			          'for': 'student-' + name
+			        }).text(name)));
+			  });
+
+			  $('#students ul>li').tsort('input', {
+			    attr: 'value'
+			  });
+
+			  var segments = [];
+			  $.each($('#students input:checked'), function (key, cbox) {
+			    segments.push(cbox.value);
+			  });
+
+			  wheel.segments = segments;
+			  wheel.init();
+			  wheel.update(randomNumber);
+
+			  // Hide the address bar (for mobile devices)!
+			  setTimeout(function () {
+			    window.scrollTo(0, 1);
+			  }, 0);
+			});
+
+
+        }
+
+        // Other code for spinning the wheel...
+
+        // Once the page loads, emit a 'join' event to let the server know that the user is still active
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const username = urlParams.get('username');
+          if (username) {
+            socket.emit('join', {username: {username}, segmentLength: wheel.segments.length});
+          } else {
+            console.error('Username not provided in URL parameters');
+          }
+        });
+
+        // Add an event listener to the spin button
+		document.getElementById('spinButton').addEventListener('click', function() {
+		    // Emit 'startSpin' event to the server
+          var r = Math.floor(Math.random() * wheel.segments.length);
+          const startAngle = ((r + 0.5) / wheel.segments.length) * Math.PI * 2;
+          socket.emit('spin', startAngle);
+		});
+		
+    </script>
+
+  </body>
+</html>

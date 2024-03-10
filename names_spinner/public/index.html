@@ -1,0 +1,40 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Names</title>
+</head>
+<body>
+    <h1>Welcome to the Lobby</h1>
+    <input type="text" id="usernameInput" placeholder="Enter your name">
+    <button onclick="joinLobby()">Join Lobby</button>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+    <script src="socket.js"></script>
+    <script>
+        function joinLobby() {
+            const username = document.getElementById('usernameInput').value;
+            if (username.trim() !== '') {
+                socket.emit('join', username);
+                window.location.href = `/wheel.html?username=${username}`;
+            }
+        }
+
+        // Define updateUserList function to update the list of users
+        function updateUserList(users) {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = ''; // Clear previous list
+
+            users.forEach(user => {
+                const listItem = document.createElement('li');
+                listItem.textContent = user.name;
+                userList.appendChild(listItem);
+            });
+
+
+        }
+    </script>
+</body>
+</html>
